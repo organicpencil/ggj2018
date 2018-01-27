@@ -21,7 +21,10 @@ var APP_ASSETS_PATH = m_cfg.get_assets_path("game");
 
 // Custom global vars
 var TRANSMITTER_LED = "TRANSMITTER_LED"; // Object name
+var LED_MATERIAL = "Led"; // LED material name
 var _TRANSMITTER_LED = null; // Object reference, set automatically
+
+toggleLiveInput();
 
 /**
  * export the method to initialize the app (called at the bottom of this file)
@@ -83,8 +86,6 @@ function load_cb(data_id, success) {
     
     _TRANSMITTER_LED = m_scenes.get_object_by_name(TRANSMITTER_LED);
 
-    //m_app.enable_camera_controls();
-
     // place your code here
     setup_controls();
 
@@ -126,12 +127,14 @@ function setup_controls()
 function led_on()
 {
     //m_material.set_diffuse_color(_TRANSMITTER_LED, "Led", [1.0, 0.0, 0.0]);
-    m_material.set_emit_factor(_TRANSMITTER_LED, "Led", 1.0);
+    m_material.set_emit_factor(_TRANSMITTER_LED, LED_MATERIAL, 1.0);
+    
+    console.log(CURRENT_PITCH);
 };
 
 function led_off()
 {
-    m_material.set_emit_factor(_TRANSMITTER_LED, "Led", 0.0);
+    m_material.set_emit_factor(_TRANSMITTER_LED, LED_MATERIAL, 0.0);
 };
 
 });
