@@ -27,8 +27,8 @@ var DEBUG = (m_ver.type() == "DEBUG");
 var APP_ASSETS_PATH = m_cfg.get_assets_path("game");
 
 // Custom global vars
-var TRANSMITTER_LED = "TRANSMITTER_LED"; // Object name
-var LED_MATERIAL = "Led"; // LED material name
+var TRANSMITTER_LED = "Mon-LED"; // Object name
+var LED_MATERIAL = "Red-Light"; // LED material name
 
 var GAMEPLAY = null;
 

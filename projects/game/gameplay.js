@@ -24,6 +24,17 @@ function Gameplay(time)
         BABYPLAYER.update(time);
         MELODYPLAYER.update(time);
         
+        if (TRANSMIT_HELD)
+        {
+            var ob = m_scenes.get_object_by_name(TRANSMITTER_LED);
+            m_material.set_emit_factor(ob, LED_MATERIAL, 1.0);
+        }
+        else
+        {
+            var ob = m_scenes.get_object_by_name(TRANSMITTER_LED);
+            m_material.set_emit_factor(ob, LED_MATERIAL, 0.0);
+        }
+        
         switch (this.state)
         {
             case STATE_SLEEPING:
@@ -62,8 +73,6 @@ function Gameplay(time)
                     BABYPLAYER.stop();
                     
                     this.state = STATE_RECORD;
-                    var ob = m_scenes.get_object_by_name(TRANSMITTER_LED);
-                    m_material.set_emit_factor(ob, LED_MATERIAL, 1.0);
                     
 		            NEXT_INTERVAL = null;
                     HASHING = true;
@@ -75,8 +84,8 @@ function Gameplay(time)
             case STATE_RECORD:
                 if (!TRANSMIT_HELD)
                 {
-                    var ob = m_scenes.get_object_by_name(TRANSMITTER_LED);
-                    m_material.set_emit_factor(ob, LED_MATERIAL, 0.0);
+                    //var ob = m_scenes.get_object_by_name(TRANSMITTER_LED);
+                    //m_material.set_emit_factor(ob, LED_MATERIAL, 0.0);
                     
                     NEW_HASH = generate_hash();
                     HASHING = false;
