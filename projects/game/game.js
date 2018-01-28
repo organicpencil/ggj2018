@@ -24,7 +24,8 @@ var APP_ASSETS_PATH = m_cfg.get_assets_path("game");
 // Custom global vars
 var TRANSMITTER_LED = "TRANSMITTER_LED"; // Object name
 var LED_MATERIAL = "Led"; // LED material name
-var _TRANSMITTER_LED = null; // Object reference, set automatically
+
+var GAMEPLAY = null;
 
 load_sound();
 
@@ -86,11 +87,7 @@ function load_cb(data_id, success) {
         return;
     }
     
-    _TRANSMITTER_LED = m_scenes.get_object_by_name(TRANSMITTER_LED);
-
     toggleLiveInput();
-    togglePlayback();
-    HASHING = true;
 
     // place your code here
     setup_controls();
@@ -109,8 +106,7 @@ function setup_controls()
             switch (id)
             {
             case "TRANSMIT":
-                // TODO - OPEN MIC
-                led_on();
+                TRANSMIT_HELD = true;
                 break;
             }
             
@@ -120,8 +116,7 @@ function setup_controls()
             switch (id)
             {
             case "TRANSMIT":
-                // TODO - CLOSE MIC
-                led_off();
+                TRANSMIT_HELD = false;
                 break;
             }
         }
@@ -129,6 +124,15 @@ function setup_controls()
     
     m_ctl.create_sensor_manifold(null, "TRANSMIT", m_ctl.CT_CONTINUOUS, sensor_array, null, transmit_cb);
     m_main.append_loop_cb(updatePitch_cb);
+    
+    GAMEPLAY = new Gameplay(m_time.get_timeline());
+    m_main.append_loop_cb(update_whatever);
+}
+
+function update_whatever()
+{
+    var time = m_time.get_timeline();
+    GAMEPLAY.update(time);
 }
 
 function updatePitch_cb() {
@@ -228,26 +232,6 @@ function updatePitch_cb() {
 	//	window.requestAnimationFrame = window.webkitRequestAnimationFrame;
 	//rafID = window.requestAnimationFrame( updatePitch );
 }
-
-function led_on()
-{
-    //m_material.set_diffuse_color(_TRANSMITTER_LED, "Led", [1.0, 0.0, 0.0]);
-    m_material.set_emit_factor(_TRANSMITTER_LED, LED_MATERIAL, 1.0);
-    //console.log(CURRENT_PITCH);
-	if (!HASHING)
-	{
-		NEXT_INTERVAL = null;
-	}
-    HASHING = true;
-};
-
-function led_off()
-{
-    m_material.set_emit_factor(_TRANSMITTER_LED, LED_MATERIAL, 0.0);
-    NEW_HASH = generate_hash();
-    console.log(NEW_HASH);
-    HASHING = false;
-};
 
 });
 
