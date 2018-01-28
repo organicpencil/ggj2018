@@ -19,7 +19,7 @@ function Gameplay(time)
     this.current_level = 1;
     this.timer = time + 5.0;
     
-    this.update = function(time)
+    this.update = function(time, m_scenes, m_material, TRANSMITTER_LED, LED_MATERIAL)
     {
         BABYPLAYER.update(time);
         MELODYPLAYER.update(time);
@@ -41,14 +41,14 @@ function Gameplay(time)
                 if (time > this.timer)
                 {
                     this.state = STATE_PLAY;
-                    MELODYPLAYER.play(this.current_level);
+                    MELODYPLAYER.play(time, this.current_level);
                     // TODO - Toggle melody visual feedback
                     console.log("Switching to STATE_PLAY");
                 }
                 break;
                 
             case STATE_PLAY:
-                if (MELODYPLAYER.finished)
+                if (MELODYPLAYER.finished == true)
                 {
                     this.state = STATE_RECORD_WAIT;
                     // TODO - Toggle melody visual feedback

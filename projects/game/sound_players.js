@@ -15,17 +15,22 @@ function BabyPlayer()
 
 function MelodyPlayer()
 {
+    this.playing = false;
     this.finished = false;
+    this.timer = 0.0;
     
-    this.play = function(level) // Levels 0 - 4 (nothing, low, medium, high, extreme)
+    this.play = function(time, level) // Levels 0 - 4 (nothing, low, medium, high, extreme)
     {
-    };
-    
-    this.stop = function() // Don't really need stop for MelodyPlayer
-    {
+        togglePlayback();
+        this.timer = time + SOUND_DURATION;
+        this.playing = true;
     };
     
     this.update = function(time)
     {
+        if (this.playing && time > this.timer)
+        {
+            this.finished = true;
+        }
     };
 }

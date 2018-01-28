@@ -132,7 +132,7 @@ function setup_controls()
 function update_whatever()
 {
     var time = m_time.get_timeline();
-    GAMEPLAY.update(time);
+    GAMEPLAY.update(time, m_scenes, m_material, TRANSMITTER_LED, LED_MATERIAL);
 }
 
 function updatePitch_cb() {
