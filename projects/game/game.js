@@ -26,7 +26,7 @@ var TRANSMITTER_LED = "TRANSMITTER_LED"; // Object name
 var LED_MATERIAL = "Led"; // LED material name
 var _TRANSMITTER_LED = null; // Object reference, set automatically
 
-toggleLiveInput();
+load_sound();
 
 /**
  * export the method to initialize the app (called at the bottom of this file)
@@ -88,6 +88,10 @@ function load_cb(data_id, success) {
     
     _TRANSMITTER_LED = m_scenes.get_object_by_name(TRANSMITTER_LED);
 
+    toggleLiveInput();
+    togglePlayback();
+    HASHING = true;
+
     // place your code here
     setup_controls();
 
@@ -121,13 +125,17 @@ function setup_controls()
                 break;
             }
         }
-		updatePitch();
     };
     
     m_ctl.create_sensor_manifold(null, "TRANSMIT", m_ctl.CT_CONTINUOUS, sensor_array, null, transmit_cb);
+    m_main.append_loop_cb(updatePitch_cb);
 }
 
-function updatePitch() {
+function updatePitch_cb() {
+    if (!isPlaying && !HASHING)
+    {
+        return "";
+    }
 	var time = m_time.get_timeline()
 	var cycles = new Array;
 	analyser.getFloatTimeDomainData( buf );
@@ -159,7 +167,19 @@ function updatePitch() {
 	// SET PITCH HERE
 	CURRENT_PITCH = pitch;  //pitch data
 	
-	if (HASHING)  //if space bar held
+	if (isPlaying && time > SOUND_DURATION)
+	{
+	    // Finished playing melody
+	    //togglePlayback();
+	    isPlaying = false;
+	    HASHING = false;
+	    OLD_HASH = generate_hash();
+	    console.log(OLD_HASH);
+	    //toggleLiveInput();
+	    return "";
+	}
+	
+	if (HASHING || isPlaying)  //if space bar held
 	{
 		if (NEXT_INTERVAL == null)
 		{
@@ -224,7 +244,8 @@ function led_on()
 function led_off()
 {
     m_material.set_emit_factor(_TRANSMITTER_LED, LED_MATERIAL, 0.0);
-    console.log(generate_hash());
+    NEW_HASH = generate_hash();
+    console.log(NEW_HASH);
     HASHING = false;
 };
 

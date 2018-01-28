@@ -35,6 +35,8 @@ var HIGHEST_PITCH = null;
 var NEXT_INTERVAL = 0.0;
 var HASH_SAMPLE_OFFSET = 0.25; // Milliseconds
 
+var SOUND_DURATION = 4.47
+
 var OLD_HASH = "";
 var NEW_HASH = "";
 
@@ -58,11 +60,12 @@ var pitchAVG = 0;
 var pitchCount = 0;
 var pitches = [];
 
-window.onload = function() {
+function load_sound() {
 	audioContext = new AudioContext();
 	MAX_SIZE = Math.max(4,Math.floor(audioContext.sampleRate/5000));	// corresponds to a 5kHz signal
 	var request = new XMLHttpRequest();
-	request.open("GET", "../sounds/whistling3.ogg", true);
+	//request.open("GET", "../sounds/whistling3.ogg", true);
+	request.open("GET", "Melody1_119.ogg", true);
 	request.responseType = "arraybuffer";
 	request.onload = function() {
 	  audioContext.decodeAudioData( request.response, function(buffer) { 
@@ -147,9 +150,6 @@ function toggleOscillator() {
         sourceNode = null;
         analyser = null;
         isPlaying = false;
-		if (!window.cancelAnimationFrame)
-			window.cancelAnimationFrame = window.webkitCancelAnimationFrame;
-        window.cancelAnimationFrame( rafID );
         return "play oscillator";
     }
     sourceNode = audioContext.createOscillator();
@@ -173,9 +173,6 @@ function toggleLiveInput() {
         sourceNode = null;
         analyser = null;
         isPlaying = false;
-		if (!window.cancelAnimationFrame)
-			window.cancelAnimationFrame = window.webkitCancelAnimationFrame;
-        window.cancelAnimationFrame( rafID );
     }
     getUserMedia(
     	{
@@ -189,6 +186,7 @@ function toggleLiveInput() {
                 "optional": []
             },
         }, gotStream);
+    isLiveInput = true;
 }
 
 function togglePlayback() {
@@ -198,15 +196,12 @@ function togglePlayback() {
         sourceNode = null;
         analyser = null;
         isPlaying = false;
-		if (!window.cancelAnimationFrame)
-			window.cancelAnimationFrame = window.webkitCancelAnimationFrame;
-        window.cancelAnimationFrame( rafID );
         return "start";
     }
 
     sourceNode = audioContext.createBufferSource();
     sourceNode.buffer = theBuffer;
-    //sourceNode.loop = true;
+    sourceNode.loop = false;
 
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 2048;
@@ -216,6 +211,7 @@ function togglePlayback() {
     isPlaying = true;
     isLiveInput = false;
     //updatePitch();
+    console.log("STARTED");
 
     return "stop";
 }
@@ -355,6 +351,10 @@ function generate_hash() {
     var low = LOWEST_PITCH + third;
     var medium = low + third;
     
+    var low_count = 0;
+    var medium_count = 0;
+    var high_count = 0;
+    
     for (i = 0; i < PITCHES.length; i++)
     {
         var pitch = PITCHES[i];
@@ -362,14 +362,17 @@ function generate_hash() {
         if (pitch < low)
         {
             hash += "L";
+            low_count += 1;
         }
         else if (pitch < medium)
         {
             hash += "M";
+            medium_count += 1;
         }
         else
         {
             hash += "H";
+            high_count += 1;
         }
     }
     
@@ -378,5 +381,17 @@ function generate_hash() {
     HIGHEST_PITCH = null;
     NEXT_INTERVAL = 0.0;
     
-    return hash;
+    if (low_count > medium_count && low_count > high_count)
+    {
+        return "L";
+    }
+    else if (medium_count > low_count && medium_count > high_count)
+    {
+        return "M";
+    }
+    else
+    {
+        return "H";
+    }
+    //return hash;
 }
