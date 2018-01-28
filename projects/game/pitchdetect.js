@@ -33,7 +33,7 @@ var PITCHES = [];
 var LOWEST_PITCH = null;
 var HIGHEST_PITCH = null;
 var NEXT_INTERVAL = 0.0;
-var HASH_SAMPLE_OFFSET = 500.0; // Milliseconds
+var HASH_SAMPLE_OFFSET = 0.25; // Milliseconds
 
 var OLD_HASH = "";
 var NEW_HASH = "";
@@ -137,7 +137,7 @@ function gotStream(stream) {
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 2048;
     mediaStreamSource.connect( analyser );
-    updatePitch();
+    //updatePitch();
 }
 
 function toggleOscillator() {
@@ -161,7 +161,7 @@ function toggleOscillator() {
     sourceNode.start(0);
     isPlaying = true;
     isLiveInput = false;
-    updatePitch();
+    //updatePitch();
 
     return "stop";
 }
@@ -215,7 +215,7 @@ function togglePlayback() {
     sourceNode.start( 0 );
     isPlaying = true;
     isLiveInput = false;
-    updatePitch();
+    //updatePitch();
 
     return "stop";
 }
@@ -334,79 +334,13 @@ function autoCorrelate( buf, sampleRate ) {
 //	var best_frequency = sampleRate/best_offset;
 }
 
-function updatePitch( time ) {
-	var cycles = new Array;
-	analyser.getFloatTimeDomainData( buf );
-	var ac = autoCorrelate( buf, audioContext.sampleRate );
-	// TODO: Paint confidence meter on canvasElem here.
 
- 	if (ac == -1) {
-		CURRENT_PITCH = 0.0
- 	} else {
-	 	//detectorElem.className = "confident";
-	 	pitch = ac;
-	 	// SET PITCH HERE
-	 	CURRENT_PITCH = pitch;  //pitch data
-		
-		//Austin's bad code starts here>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-		if(pitchCount < 1000)
-		{
-			pitches[pitchCount] = pitch;
-			pitchCount++;
-		}
-		else
-		{
-			pitchCount = 0;
-		}
-		
-		calculateAvgPitch();
-	 	//Austin's bad code stops here<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-	 	if (HASHING)  //if space bar held
-	 	{
-	     	if (LOWEST_PITCH == null || pitch < LOWEST_PITCH)
-	     	{
-	     	    LOWEST_PITCH = pitch;
-	     	}
-	     	
-	     	if (HIGHEST_PITCH == null || pitch > HIGHEST_PITCH)
-	     	{
-	     	    HIGHEST_PITCH = pitch;
-	     	}
-	     	    
-	     	if (time > NEXT_INTERVAL)
-     	    {
-     	        PITCHES.push(pitchAVG);
-     	        NEXT_INTERVAL += HASH_SAMPLE_OFFSET;
-     	    }
-        }
-	 	/*
-	 	pitchElem.innerText = Math.round( pitch ) ;
-	 	var note =  noteFromPitch( pitch );
-		noteElem.innerHTML = noteStrings[note%12];
-		var detune = centsOffFromPitch( pitch, note );
-		if (detune == 0 ) {
-			detuneElem.className = "";
-			detuneAmount.innerHTML = "--";
-		} else {
-			if (detune < 0)
-				detuneElem.className = "flat";
-			else
-				detuneElem.className = "sharp";
-			detuneAmount.innerHTML = Math.abs( detune );
-		}
-		*/
-	}
-
-	if (!window.requestAnimationFrame)
-		window.requestAnimationFrame = window.webkitRequestAnimationFrame;
-	rafID = window.requestAnimationFrame( updatePitch );
-}
 
 function calculateAvgPitch()
 {
 	var pitchSUM = 0;
 	
-	for(var i:int = 0; i < pitches.length; i++)
+	for(var i = 0; i < pitches.length; i++)
 	{
 		pitchSUM += pitches[i];
 	}
