@@ -98,7 +98,7 @@ function load_cb(data_id, success) {
     m_mouse.enable_mouse_hover_outline();
 	//--------------------------------------------------------------------------------------
 	var listScenes = m_scenes.get_scenes();
-    m_scenes.set_active(listScenes[1]); 
+    m_scenes.set_active(listScenes[0]); 
 	//m_camera.set_translation(m_scenes.get_object_by_name("Camera"), [0,-3,10]);
 	
 	
