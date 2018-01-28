@@ -55,13 +55,13 @@ function changeMinute()
 	
 	if(minute > 9)
 	{
-		_MINUTE_1.fillText(minute[0]);
+		_MINUTE_1.fillText(minute[0].toString());
 		_MINUTE_10.fillText("0");
 	}
 	else
 	{
-		_MINUTE_1.fillText(minute[1]);
-		_MINUTE_10.fillText(minute[0]);
+		_MINUTE_1.fillText(minute[1].toString());
+		_MINUTE_10.fillText(minute[0].toString());
 	}
 	return;
 }
@@ -76,8 +76,8 @@ function changeHour()
 		if(amPM())
 		{
 			hour = 12;
-			_HOUR_1.fillText(hour[1]);
-			_HOUR_10.fillText(hour[0]);
+			_HOUR_1.fillText(hour[1].toString());
+			_HOUR_10.fillText(hour[0].toString());
 		}
 		else
 		{
@@ -90,13 +90,13 @@ function changeHour()
 	
 	if(minute > 9)
 	{
-		_HOUR_1.fillText(hour[0]);
+		_HOUR_1.fillText(hour[0].toString());
 		_HOUR_10.fillText("0");
 	}
 	else
 	{
-		_HOUR_1.fillText(hour[1]);
-		_HOUR_10.fillText(hour[0]);
+		_HOUR_1.fillText(hour[1].toString());
+		_HOUR_10.fillText(hour[0].toString());
 	}
 	return;
 }
