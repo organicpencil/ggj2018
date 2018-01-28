@@ -12,6 +12,7 @@ var m_main      = require("main");
 var m_material  = require("material");
 var m_preloader = require("preloader");
 var m_scenes    = require("scenes");
+var m_time      = require("time");
 var m_ver       = require("version");
 
 // detect application mode
@@ -120,9 +121,92 @@ function setup_controls()
                 break;
             }
         }
+		updatePitch();
     };
     
     m_ctl.create_sensor_manifold(null, "TRANSMIT", m_ctl.CT_CONTINUOUS, sensor_array, null, transmit_cb);
+}
+
+function updatePitch() {
+	var time = m_time.get_timeline()
+	var cycles = new Array;
+	analyser.getFloatTimeDomainData( buf );
+	var ac = autoCorrelate( buf, audioContext.sampleRate );
+	// TODO: Paint confidence meter on canvasElem here.
+
+	
+	 	//detectorElem.className = "confident";
+	var pitch = pitchAVG;
+	if (ac != -1)
+	{
+		if (100.0 < ac && ac < 2000.0)
+		{
+			pitch = ac;
+			
+			if(pitchCount < 30)
+			{
+				pitches[pitchCount] = pitch;
+				pitchCount++;
+			}
+			else
+			{
+				pitchCount = 0;
+			}
+			calculateAvgPitch();
+		}
+	}
+	
+	// SET PITCH HERE
+	CURRENT_PITCH = pitch;  //pitch data
+	
+	if (HASHING)  //if space bar held
+	{
+		if (NEXT_INTERVAL == null)
+		{
+			NEXT_INTERVAL = time + HASH_SAMPLE_OFFSET;
+		}
+		if (100.0 < pitchAVG && pitchAVG < 2000.0)
+		{
+			
+			if (LOWEST_PITCH == null || pitchAVG < LOWEST_PITCH)
+			{
+				LOWEST_PITCH = pitchAVG;
+			}
+			
+			if (HIGHEST_PITCH == null || pitchAVG > HIGHEST_PITCH)
+			{
+				HIGHEST_PITCH = pitchAVG;
+			}
+				
+			if (time > NEXT_INTERVAL)
+			{
+				//console.log(time - NEXT_INTERVAL);
+				console.log(pitchAVG);
+				PITCHES.push(pitchAVG);
+				NEXT_INTERVAL += HASH_SAMPLE_OFFSET;
+			}
+		}
+	 	/*
+	 	pitchElem.innerText = Math.round( pitch ) ;
+	 	var note =  noteFromPitch( pitch );
+		noteElem.innerHTML = noteStrings[note%12];
+		var detune = centsOffFromPitch( pitch, note );
+		if (detune == 0 ) {
+			detuneElem.className = "";
+			detuneAmount.innerHTML = "--";
+		} else {
+			if (detune < 0)
+				detuneElem.className = "flat";
+			else
+				detuneElem.className = "sharp";
+			detuneAmount.innerHTML = Math.abs( detune );
+		}
+		*/
+	}
+
+	//if (!window.requestAnimationFrame)
+	//	window.requestAnimationFrame = window.webkitRequestAnimationFrame;
+	//rafID = window.requestAnimationFrame( updatePitch );
 }
 
 function led_on()
@@ -130,6 +214,10 @@ function led_on()
     //m_material.set_diffuse_color(_TRANSMITTER_LED, "Led", [1.0, 0.0, 0.0]);
     m_material.set_emit_factor(_TRANSMITTER_LED, LED_MATERIAL, 1.0);
     //console.log(CURRENT_PITCH);
+	if (!HASHING)
+	{
+		NEXT_INTERVAL = null;
+	}
     HASHING = true;
 };
 

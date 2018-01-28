@@ -33,7 +33,7 @@ var PITCHES = [];
 var LOWEST_PITCH = null;
 var HIGHEST_PITCH = null;
 var NEXT_INTERVAL = 0.0;
-var HASH_SAMPLE_OFFSET = 500.0; // Milliseconds
+var HASH_SAMPLE_OFFSET = 0.25; // Milliseconds
 
 var OLD_HASH = "";
 var NEW_HASH = "";
@@ -52,6 +52,11 @@ var detectorElem,
 	noteElem,
 	detuneElem,
 	detuneAmount;
+	
+//Array of Past Dump
+var pitchAVG = 0;
+var pitchCount = 0;
+var pitches = [];
 
 window.onload = function() {
 	audioContext = new AudioContext();
@@ -132,7 +137,7 @@ function gotStream(stream) {
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 2048;
     mediaStreamSource.connect( analyser );
-    updatePitch();
+    //updatePitch();
 }
 
 function toggleOscillator() {
@@ -156,7 +161,7 @@ function toggleOscillator() {
     sourceNode.start(0);
     isPlaying = true;
     isLiveInput = false;
-    updatePitch();
+    //updatePitch();
 
     return "stop";
 }
@@ -210,7 +215,7 @@ function togglePlayback() {
     sourceNode.start( 0 );
     isPlaying = true;
     isLiveInput = false;
-    updatePitch();
+    //updatePitch();
 
     return "stop";
 }
@@ -329,88 +334,18 @@ function autoCorrelate( buf, sampleRate ) {
 //	var best_frequency = sampleRate/best_offset;
 }
 
-function updatePitch( time ) {
-	var cycles = new Array;
-	analyser.getFloatTimeDomainData( buf );
-	var ac = autoCorrelate( buf, audioContext.sampleRate );
-	// TODO: Paint confidence meter on canvasElem here.
 
-	/*if (DEBUGCANVAS) {  // This draws the current waveform, useful for debugging
-		waveCanvas.clearRect(0,0,512,256);
-		waveCanvas.strokeStyle = "red";
-		waveCanvas.beginPath();
-		waveCanvas.moveTo(0,0);
-		waveCanvas.lineTo(0,256);
-		waveCanvas.moveTo(128,0);
-		waveCanvas.lineTo(128,256);
-		waveCanvas.moveTo(256,0);
-		waveCanvas.lineTo(256,256);
-		waveCanvas.moveTo(384,0);
-		waveCanvas.lineTo(384,256);
-		waveCanvas.moveTo(512,0);
-		waveCanvas.lineTo(512,256);
-		waveCanvas.stroke();
-		waveCanvas.strokeStyle = "black";
-		waveCanvas.beginPath();
-		waveCanvas.moveTo(0,buf[0]);
-		for (var i=1;i<512;i++) {
-			waveCanvas.lineTo(i,128+(buf[i]*128));
-		}
-		waveCanvas.stroke();
-	}*/
 
- 	if (ac == -1) {
- 		//detectorElem.className = "vague";
-	 	//pitchElem.innerText = "--";
-		//noteElem.innerText = "-";
-		//detuneElem.className = "";
-		//detuneAmount.innerText = "--";
-		CURRENT_PITCH = 0.0
- 	} else {
-	 	//detectorElem.className = "confident";
-	 	pitch = ac;
-	 	// SET PITCH HERE
-	 	CURRENT_PITCH = pitch;
-	 	
-	 	if (HASHING)
-	 	{
-	     	if (LOWEST_PITCH == null || pitch < LOWEST_PITCH)
-	     	{
-	     	    LOWEST_PITCH = pitch;
-	     	}
-	     	
-	     	if (HIGHEST_PITCH == null || pitch > HIGHEST_PITCH)
-	     	{
-	     	    HIGHEST_PITCH = pitch;
-	     	}
-	     	    
-	     	if (time > NEXT_INTERVAL)
-     	    {
-     	        PITCHES.push(pitch);
-     	        NEXT_INTERVAL += HASH_SAMPLE_OFFSET;
-     	    }
-        }
-	 	/*
-	 	pitchElem.innerText = Math.round( pitch ) ;
-	 	var note =  noteFromPitch( pitch );
-		noteElem.innerHTML = noteStrings[note%12];
-		var detune = centsOffFromPitch( pitch, note );
-		if (detune == 0 ) {
-			detuneElem.className = "";
-			detuneAmount.innerHTML = "--";
-		} else {
-			if (detune < 0)
-				detuneElem.className = "flat";
-			else
-				detuneElem.className = "sharp";
-			detuneAmount.innerHTML = Math.abs( detune );
-		}
-		*/
+function calculateAvgPitch()
+{
+	var pitchSUM = 0;
+	
+	for(var i = 0; i < pitches.length; i++)
+	{
+		pitchSUM += pitches[i];
 	}
-
-	if (!window.requestAnimationFrame)
-		window.requestAnimationFrame = window.webkitRequestAnimationFrame;
-	rafID = window.requestAnimationFrame( updatePitch );
+	
+	pitchAVG = pitchSUM / pitches.length;
 }
 
 function generate_hash() {
