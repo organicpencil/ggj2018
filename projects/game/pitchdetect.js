@@ -52,6 +52,11 @@ var detectorElem,
 	noteElem,
 	detuneElem,
 	detuneAmount;
+	
+//Array of Past Dump
+var pitchAVG = 0;
+var pitchCount = 0;
+var pitches = [];
 
 window.onload = function() {
 	audioContext = new AudioContext();
@@ -335,44 +340,28 @@ function updatePitch( time ) {
 	var ac = autoCorrelate( buf, audioContext.sampleRate );
 	// TODO: Paint confidence meter on canvasElem here.
 
-	/*if (DEBUGCANVAS) {  // This draws the current waveform, useful for debugging
-		waveCanvas.clearRect(0,0,512,256);
-		waveCanvas.strokeStyle = "red";
-		waveCanvas.beginPath();
-		waveCanvas.moveTo(0,0);
-		waveCanvas.lineTo(0,256);
-		waveCanvas.moveTo(128,0);
-		waveCanvas.lineTo(128,256);
-		waveCanvas.moveTo(256,0);
-		waveCanvas.lineTo(256,256);
-		waveCanvas.moveTo(384,0);
-		waveCanvas.lineTo(384,256);
-		waveCanvas.moveTo(512,0);
-		waveCanvas.lineTo(512,256);
-		waveCanvas.stroke();
-		waveCanvas.strokeStyle = "black";
-		waveCanvas.beginPath();
-		waveCanvas.moveTo(0,buf[0]);
-		for (var i=1;i<512;i++) {
-			waveCanvas.lineTo(i,128+(buf[i]*128));
-		}
-		waveCanvas.stroke();
-	}*/
-
  	if (ac == -1) {
- 		//detectorElem.className = "vague";
-	 	//pitchElem.innerText = "--";
-		//noteElem.innerText = "-";
-		//detuneElem.className = "";
-		//detuneAmount.innerText = "--";
 		CURRENT_PITCH = 0.0
  	} else {
 	 	//detectorElem.className = "confident";
 	 	pitch = ac;
 	 	// SET PITCH HERE
-	 	CURRENT_PITCH = pitch;
-	 	
-	 	if (HASHING)
+	 	CURRENT_PITCH = pitch;  //pitch data
+		
+		//Austin's bad code starts here>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		if(pitchCount < 1000)
+		{
+			pitches[pitchCount] = pitch;
+			pitchCount++;
+		}
+		else
+		{
+			pitchCount = 0;
+		}
+		
+		calculateAvgPitch();
+	 	//Austin's bad code stops here<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+	 	if (HASHING)  //if space bar held
 	 	{
 	     	if (LOWEST_PITCH == null || pitch < LOWEST_PITCH)
 	     	{
@@ -386,7 +375,7 @@ function updatePitch( time ) {
 	     	    
 	     	if (time > NEXT_INTERVAL)
      	    {
-     	        PITCHES.push(pitch);
+     	        PITCHES.push(pitchAVG);
      	        NEXT_INTERVAL += HASH_SAMPLE_OFFSET;
      	    }
         }
@@ -411,6 +400,18 @@ function updatePitch( time ) {
 	if (!window.requestAnimationFrame)
 		window.requestAnimationFrame = window.webkitRequestAnimationFrame;
 	rafID = window.requestAnimationFrame( updatePitch );
+}
+
+function calculateAvgPitch()
+{
+	var pitchSUM = 0;
+	
+	for(var i:int = 0; i < pitches.length; i++)
+	{
+		pitchSUM += pitches[i];
+	}
+	
+	pitchAVG = pitchSUM / pitches.length;
 }
 
 function generate_hash() {
