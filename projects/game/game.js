@@ -8,6 +8,7 @@ var m_app       = require("app");
 var m_cfg       = require("config");
 var m_ctl       = require("controls");
 var m_data      = require("data");
+var m_main      = require("main");
 var m_material  = require("material");
 var m_preloader = require("preloader");
 var m_scenes    = require("scenes");
@@ -128,13 +129,15 @@ function led_on()
 {
     //m_material.set_diffuse_color(_TRANSMITTER_LED, "Led", [1.0, 0.0, 0.0]);
     m_material.set_emit_factor(_TRANSMITTER_LED, LED_MATERIAL, 1.0);
-    
-    console.log(CURRENT_PITCH);
+    //console.log(CURRENT_PITCH);
+    HASHING = true;
 };
 
 function led_off()
 {
     m_material.set_emit_factor(_TRANSMITTER_LED, LED_MATERIAL, 0.0);
+    console.log(generate_hash());
+    HASHING = false;
 };
 
 });

@@ -21,12 +21,22 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
--- Modified by Lee Pugh (organicpencil) January 2017
+-- Gruesomely modified by Lee Pugh (organicpencil) January 2017
 */
 
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 
-var CURRENT_PITCH = 0.0
+var CURRENT_PITCH = 0.0;
+
+var HASHING = false;
+var PITCHES = [];
+var LOWEST_PITCH = null;
+var HIGHEST_PITCH = null;
+var NEXT_INTERVAL = 0.0;
+var HASH_SAMPLE_OFFSET = 500.0; // Milliseconds
+
+var OLD_HASH = "";
+var NEW_HASH = "";
 
 var audioContext = null;
 var isPlaying = false;
@@ -191,7 +201,7 @@ function togglePlayback() {
 
     sourceNode = audioContext.createBufferSource();
     sourceNode.buffer = theBuffer;
-    sourceNode.loop = true;
+    //sourceNode.loop = true;
 
     analyser = audioContext.createAnalyser();
     analyser.fftSize = 2048;
@@ -325,7 +335,7 @@ function updatePitch( time ) {
 	var ac = autoCorrelate( buf, audioContext.sampleRate );
 	// TODO: Paint confidence meter on canvasElem here.
 
-	if (DEBUGCANVAS) {  // This draws the current waveform, useful for debugging
+	/*if (DEBUGCANVAS) {  // This draws the current waveform, useful for debugging
 		waveCanvas.clearRect(0,0,512,256);
 		waveCanvas.strokeStyle = "red";
 		waveCanvas.beginPath();
@@ -347,7 +357,7 @@ function updatePitch( time ) {
 			waveCanvas.lineTo(i,128+(buf[i]*128));
 		}
 		waveCanvas.stroke();
-	}
+	}*/
 
  	if (ac == -1) {
  		//detectorElem.className = "vague";
@@ -361,6 +371,25 @@ function updatePitch( time ) {
 	 	pitch = ac;
 	 	// SET PITCH HERE
 	 	CURRENT_PITCH = pitch;
+	 	
+	 	if (HASHING)
+	 	{
+	     	if (LOWEST_PITCH == null || pitch < LOWEST_PITCH)
+	     	{
+	     	    LOWEST_PITCH = pitch;
+	     	}
+	     	
+	     	if (HIGHEST_PITCH == null || pitch > HIGHEST_PITCH)
+	     	{
+	     	    HIGHEST_PITCH = pitch;
+	     	}
+	     	    
+	     	if (time > NEXT_INTERVAL)
+     	    {
+     	        PITCHES.push(pitch);
+     	        NEXT_INTERVAL += HASH_SAMPLE_OFFSET;
+     	    }
+        }
 	 	/*
 	 	pitchElem.innerText = Math.round( pitch ) ;
 	 	var note =  noteFromPitch( pitch );
@@ -382,4 +411,37 @@ function updatePitch( time ) {
 	if (!window.requestAnimationFrame)
 		window.requestAnimationFrame = window.webkitRequestAnimationFrame;
 	rafID = window.requestAnimationFrame( updatePitch );
+}
+
+function generate_hash() {
+    // Generate hash
+    var hash = "";
+    var third = (HIGHEST_PITCH - LOWEST_PITCH) / 3.0;
+    var low = LOWEST_PITCH + third;
+    var medium = low + third;
+    
+    for (i = 0; i < PITCHES.length; i++)
+    {
+        var pitch = PITCHES[i];
+        
+        if (pitch < low)
+        {
+            hash += "L";
+        }
+        else if (pitch < medium)
+        {
+            hash += "M";
+        }
+        else
+        {
+            hash += "H";
+        }
+    }
+    
+    PITCHES = [];
+    LOWEST_PITCH = null;
+    HIGHEST_PITCH = null;
+    NEXT_INTERVAL = 0.0;
+    
+    return hash;
 }
