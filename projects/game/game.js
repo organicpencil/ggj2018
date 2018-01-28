@@ -7,7 +7,7 @@ b4w.register("game_main", function(exports, require) {
 var m_app       = require("app");
 var m_cfg       = require("config");
 var m_ctl       = require("controls");
-var m_camera    = require("camera");
+//var m_camera    = require("camera");
 var m_cont      = require("container");
 var m_data      = require("data");
 var m_main      = require("main");
@@ -97,8 +97,9 @@ function load_cb(data_id, success) {
     cont.addEventListener("mousedown", main_canvas_down, false);
     m_mouse.enable_mouse_hover_outline();
 	//--------------------------------------------------------------------------------------
-	
-	m_camera.set_translation(m_scenes.get_object_by_name("Camera"), [-10,8,6]);
+	var listScenes = m_scenes.get_scenes();
+    m_scenes.set_active(listScenes[1]); 
+	//m_camera.set_translation(m_scenes.get_object_by_name("Camera"), [0,-3,10]);
 	
 	
     toggleLiveInput();
